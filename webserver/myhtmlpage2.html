@@ -1,0 +1,21 @@
+<body>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="refresh" content="1">
+    </head>
+    <body>
+        <h1>{{.PageTitle}}</h1>
+        <iframe id="idcw" name="cw" src="contreadingdata.html" scrolling="YES" frameBorder="1" style="width:25%; height:400px;"></iframe>
+        
+        <script>
+            // window.setInterval("reloadIFrame();", 1000);
+            
+            function reloadIFrame() {
+                document.getElelementById("idcw").location.reload();
+            }
+        </script>
+        
+        <BR>
+        <a href='/index.html' class='button'>HOME</a>
+    </body>
+</html>    

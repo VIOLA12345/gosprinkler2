@@ -1,0 +1,13 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <body>
+        <h1>{{.PageTitle}}</h1>
+        <B><Font color=green>{{.SprinklerMsg}}</Font></B>
+        <BR>
+        <B><Font color=red>{{.MoistureMsg}}</Font></B>
+        <BR>
+        <a href='/index.html' class='button'>HOME</a>  
+        {{ if (eq .AutoOff "YES") }}
+            <iframe id="idcw" name="cw" src="/sprinkler/autooff?which={{.Sprinkler}}" scrolling="NO" frameBorder="0" style="width:25%; height:0px;"></iframe> 
+        {{ end }} 
+    </body>
+</html> 

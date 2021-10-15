@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <style>
+        table, th, td {
+          border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+  <h1>INDOOR WATER IRRIGATION SYSTEM</h1>
+  <img src="water-irrigation1.jpg" width="1000" height="500" align="center">
+  <BR><BR>
+  <table>
+        <tr>
+          <th rowspan="2">Select the Sprinkler to turn on</th>
+          <td><a href="/sprinkler/on?which=A">Turn on Sprinkler A</a></td>
+        </tr>
+        <tr>
+          <td><a href="/sprinkler/on?which=B">Turn on Sprinkler B</a></td>
+        </tr>
+        <tr>
+          <th rowspan="2">Select the Sprinkler to turn Off</th>
+          <td><a href="/sprinkler/off?which=A">Turn Of Sprinkler A</a></td>
+        </tr>
+        <tr>
+          <td><a href="/sprinkler/off?which=B">Turn Of Sprinkler B</a></td>
+        </tr>
+
+	<tr>
+          <th rowspan="2">Continous Reading for Sprinkler B</th>
+	  <td><a href="/continousReading">Start  Continous Reading for Sprinkler B</a></td>
+	</tr>
+	
+	 <tr>
+          <td><a href="/stopContinousReading">Stop Continous Reading for Sprinkler B</a></td>
+        </tr>
+  </table>
+
+
+
+
+</body>
+</html>
