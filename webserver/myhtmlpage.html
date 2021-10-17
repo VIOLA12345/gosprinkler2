@@ -5,9 +5,12 @@
         <BR>
         <B><Font color=red>{{.MoistureMsg}}</Font></B>
         <BR>
-        <a href='/index.html' class='button'>HOME</a>  
         {{ if (eq .AutoOff "YES") }}
-            <iframe id="idcw" name="cw" src="/sprinkler/autooff?which={{.Sprinkler}}" scrolling="NO" frameBorder="0" style="width:25%; height:0px;"></iframe> 
+            <iframe id="idcw" name="cw" src="/sprinkler/autooff?which={{.Sprinkler}}" scrolling="NO" frameBorder="0" style="width:50%; height:100px;"></iframe> 
+        {{ end }} 
+        <BR>
+        {{ if (eq .AutoOffMsg "") }}
+            <a href='/index.html' class='button'>HOME</a> 
         {{ end }} 
     </body>
 </html> 

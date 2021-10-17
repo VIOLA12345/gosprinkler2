@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"math"
-	//"os/exec"
 	"os"
 	"time"
 	"net/http"
@@ -16,7 +15,6 @@ import (
 	"periph.io/x/periph/conn/i2c/i2creg"
 	"periph.io/x/periph/conn/physic"
     "periph.io/x/periph/experimental/devices/ads1x15"
-	//"net"
 )
 
 type MyMessage struct {
@@ -25,6 +23,7 @@ type MyMessage struct {
     MoistureMsg string
 	Sprinkler string
 	AutoOff string
+	AutoOffMsg string
 }
 
 var pi *raspi.Adaptor
@@ -51,9 +50,7 @@ func main() {
 
  	http.HandleFunc("/stopContinousReading", stopContinousReading)
 	
-	 http.HandleFunc("/sprinkler/autooff", sprinklerAutoOff)
-
-	//http.HandleFunc("/forceStoptheSprinkler", forceStoptheSprinkler)
+	http.HandleFunc("/sprinkler/autooff", sprinklerAutoOff)
 
 	static := http.FileServer(http.Dir("../webcontent"))
 	http.Handle("/", static)
@@ -64,7 +61,8 @@ func main() {
 
 func sprinklerAutoOff(w http.ResponseWriter, r *http.Request) {
 	whichSprinkler := r.URL.Query()["which"]
-	time.Sleep(5 * time.Second)
+	durinsecs := 7
+	time.Sleep(time.Duration(durinsecs) * time.Second)
 	switch whichSprinkler[0] {
 		case "A":
 			pi.DigitalWrite("31", 1)
@@ -73,6 +71,19 @@ func sprinklerAutoOff(w http.ResponseWriter, r *http.Request) {
 		default:
 			fmt.Println("Invalid Sprinkler")
 	}
+
+	log.Printf("After")
+
+	data := MyMessage {
+		PageTitle: "",
+		SprinklerMsg: "",
+		MoistureMsg: "Sprinkler " + whichSprinkler[0] + " is turned Off after reaching " + strconv.Itoa(durinsecs) + " seconds",
+		Sprinkler: whichSprinkler[0],
+		AutoOffMsg: "YES",
+    }
+
+	tmpl := template.Must(template.ParseFiles("myhtmlpage.html"))
+    tmpl.Execute(w, data) 
 }
 
 func getSensorReading(sprinklerNum string) float64 {
@@ -98,7 +109,7 @@ func getSensorReading(sprinklerNum string) float64 {
 	}
 	defer bus.Close()
 
-	// Create a new ADS1115 ADC.
+	//  Create a new ADS1115 ADC.
 	adc, err := ads1x15.NewADS1115(bus, &ads1x15.DefaultOpts)
 	if err != nil {
 		log.Fatalln(err)
@@ -181,18 +192,8 @@ func sprinklerOff(w http.ResponseWriter, r *http.Request) {
 	whichSprinkler := r.URL.Query()["which"]
 	moistureLevel = getSensorReading(whichSprinkler[0])
 	fmt.Println("Moisture Level : ",moistureLevel,"%")
-/*	//if enoughMoisture(moistureLevel) == false {
-		data := MyMessage {
-			PageTitle: "SPRINKLER OFF",
-			SprinklerMsg: "Will attempt to turn Offn " + whichSprinkler[0],
-			MoistureMsg: "Not Enough Moisture. Sprinkler will not Turn Off as percentage of  moisture level is : " + fmt.Sprintf("%.2f", moistureLevel),
-        }
-        tmpl := template.Must(template.ParseFiles("myhtmlpage.html"))
-        tmpl.Execute(w, data)
-    //    return
-  */  
-
-    switch whichSprinkler[0] {
+      
+	switch whichSprinkler[0] {
 		case "A":
 			pi.DigitalWrite("31", 1)
 		case "B":
@@ -209,22 +210,22 @@ func sprinklerOff(w http.ResponseWriter, r *http.Request) {
     }
 	data := MyMessage {
 		PageTitle: "SPRINKLER OFF",
-		SprinklerMsg: "Sprinkler " + whichSprinkler[0] + " is turned Off, as there is enough moisture level percentage of " + fmt.Sprintf("%.2f", moistureLevel),
-		MoistureMsg: "" ,
+		SprinklerMsg: "", 
+		MoistureMsg: "Sprinkler " + whichSprinkler[0] + " is turned Off" ,
     }
 	tmpl := template.Must(template.ParseFiles("myhtmlpage.html"))
-        tmpl.Execute(w, data)  
+    tmpl.Execute(w, data)  
 }
 
 func enoughMoisture(moistureLevel float64) bool {
 	var rValue bool
 	if moistureLevel < 70 {
 		rValue = false
-	}
-	if moistureLevel > 40 {
-		rValue = true
+	} else {
+		rValue = true	
 	}
 	return rValue
+	
 }
 
 func continousReading(w http.ResponseWriter, r *http.Request){
@@ -246,7 +247,7 @@ func stopContinousReading(w http.ResponseWriter, r *http.Request){
 	stopContinous = true
 	data := MyMessage {
 		PageTitle: " CONTINOUS READING STOPPED",
-		SprinklerMsg: "Continous Reading for Sprinkler 'A' is stopped",
+		SprinklerMsg: "Continous Reading for Sprinkler 'B' is stopped",
 		MoistureMsg: "" ,
     }
 	tmpl := template.Must(template.ParseFiles("myhtmlpage.html"))
@@ -286,11 +287,7 @@ func startContinousReading(){
         log.Fatalln(err)
     }
 	
-	/*
-    defer f.Close()
-	*/
-
-    // Obtain an analog pin from the ADC.
+	// Obtain an analog pin from the ADC.
 	pin, err := adc.PinForChannel(ads1x15.Channel1, 5*physic.Volt, 1*physic.Hertz, ads1x15.SaveEnergy)
 	if err != nil {
 		log.Fatalln(err)
@@ -308,7 +305,6 @@ func startContinousReading(){
 			mL = (currentReading - ReadingAtNoMoisture) / (ReadingAtFullMoisture - ReadingAtNoMoisture) * 100
 			moistureLevel = math.Trunc(mL)
 			dt := time.Now()
-			// time.Sleep(5 * time.Second)
 			fmt.Println(dt.Format("01-02-2006 15:04:05")," - Moisture Level : ",moistureLevel,"%")
 			
 			_, err2 := f.WriteString(dt.Format("01-02-2006 15:04:05") + " - Moisture Level : " + fmt.Sprintf("%.2f", moistureLevel) + "<BR>")
@@ -319,7 +315,6 @@ func startContinousReading(){
 			if enoughMoisture(moistureLevel) == false {
 				pi.DigitalWrite("35", 0)
 				if stopContinous == true {
-					fmt.Println("Inside Stopping")
 					pi.DigitalWrite("35", 1)
 					return
 				}
@@ -332,30 +327,6 @@ func startContinousReading(){
             }
 		}
 	}
-}
-
-
-
-func sleepforfewsecA() {
-	
-	sleepforsec:=true
-
-	if sleepforsec == true {
-		pi.DigitalWrite("31" , 1)
-
-		}
-
-}
-
-func sleepforfewsecB() {
-
-    sleepforsec:=true
-	time.Sleep(5 * time.Second)
-
-    if sleepforsec == true {
-        pi.DigitalWrite("35" , 1)
-    }
-
 }
 
 func turnOnMessage(w http.ResponseWriter) {
