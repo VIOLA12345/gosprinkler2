@@ -189,7 +189,7 @@ func sprinklerOff(w http.ResponseWriter, r *http.Request) {
         }
         tmpl := template.Must(template.ParseFiles("myhtmlpage.html"))
         tmpl.Execute(w, data)
-    //    return
+    // return
   */  
 
     switch whichSprinkler[0] {
